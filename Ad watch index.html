@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AdWatchEarn$</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg1:#1d2b34;--bg2:#2c3e50;--card:rgba(44,62,80,0.85);--accent:#2ecc71;--muted:#bdc3c7}
+    *{box-sizing:border-box}
+    body{font-family:'Poppins',sans-serif;margin:0;background:linear-gradient(135deg,var(--bg1),var(--bg2));color:#ecf0f1;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:18px}
+    .app{width:100%;max-width:420px;background:var(--card);border-radius:14px;padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.35);border:1px solid rgba(255,255,255,0.06)}
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{width:48px;height:48px;border-radius:10px;background:linear-gradient(90deg,#27ae60,#2ecc71);display:flex;align-items:center;justify-content:center;font-weight:700;color:#07381b}
+    h1{margin:0;font-size:18px}
+    .tabs{display:flex;gap:8px;margin-top:12px}
+    .tab{flex:1;padding:10px;border-radius:10px;background:transparent;border:1px solid rgba(255,255,255,0.03);text-align:center;cursor:pointer}
+    .tab.active{background:rgba(0,0,0,0.25)}
+    .view{margin-top:16px}
+    .hidden{display:none}
+    .card{background:rgba(0,0,0,0.25);padding:12px;border-radius:10px}
+    .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+    .stat{background:rgba(0,0,0,0.2);padding:12px;border-radius:8px;text-align:center}
+    .stat .label{font-size:12px;color:var(--muted)}
+    .stat .value{font-size:20px;font-weight:700;color:#3498db}
+    .progress{margin-top:12px}
+    .progress-bar{height:10px;background:rgba(255,255,255,0.06);border-radius:10px;overflow:hidden}
+    .progress-bar > span{display:block;height:100%;width:0%;background:linear-gradient(90deg,#3498db,#2980b9)}
+    .btn{width:100%;padding:14px;border-radius:12px;border:none;font-weight:700;font-size:16px;cursor:pointer;margin-top:12px}
+    .btn.primary{background:linear-gradient(90deg,var(--accent),#27ae60);color:#052815}
+    .btn.gray{background:#95a5a6;color:#072023}
+    .small{font-size:13px;color:var(--muted);margin-top:8px}
+    .footer-note{font-size:12px;color:var(--muted);text-align:center;margin-top:12px}
+    input[type=email],input[type=password],input[type=text]{width:100%;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:rgba(0,0,0,0.15);color:#ecf0f1;margin-top:8px}
+    .center{text-align:center}
+    .banner-placeholder{height:60px;background:rgba(255,255,255,0.03);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--muted);margin-top:12px}
+    .privacy{font-size:12px;color:var(--muted);margin-top:10px;text-decoration:underline;cursor:pointer}
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+    <div class="brand">
+      <div class="logo">$</div>
+      <div>
+        <h1>AdWatchEarn$</h1>
+        <div class="small">1500 Ads = 1 USDT</div>
+      </div>
+    </div><div class="tabs" role="tablist" style="margin-bottom:6px">
+  <div class="tab active" id="tab-dashboard" onclick="showTab('dashboard')">Dashboard</div>
+  <div class="tab" id="tab-withdraw" onclick="showTab('withdraw')">Withdraw</div>
+  <div class="tab" id="tab-privacy" onclick="showTab('privacy')">Privacy</div>
+</div>
+
+<!-- AUTH VIEW (shown when not logged in) -->
+<div id="authView" class="view">
+  <div class="card" id="loginCard">
+    <div class="center"><strong>Login</strong></div>
+    <input id="loginEmail" type="email" placeholder="Email" />
+    <input id="loginPassword" type="password" placeholder="Password" />
+    <button class="btn primary" onclick="login()">Login</button>
+    <div class="small center">No account? <span style="text-decoration:underline;cursor:pointer" onclick="toggleAuth()">Register</span></div>
+    <div id="loginError" class="small" style="color:#e74c3c"></div>
+  </div>
+
+  <div class="card hidden" id="registerCard" style="margin-top:12px">
+    <div class="center"><strong>Register</strong></div>
+    <input id="registerEmail" type="email" placeholder="Email" />
+    <input id="registerPassword" type="password" placeholder="Password (min 6)" />
+    <button class="btn primary" onclick="register()">Create Account</button>
+    <div class="small center">Already have account? <span style="text-decoration:underline;cursor:pointer" onclick="toggleAuth()">Login</span></div>
+    <div id="registerError" class="small" style="color:#e74c3c"></div>
+  </div>
+</div>
+
+<!-- DASHBOARD VIEW -->
+<div id="dashboard" class="view hidden">
+  <div class="card">
+    <div id="welcomeMsg">Welcome!</div>
+    <div class="stats">
+      <div class="stat"><div class="label">Ads Watched</div><div class="value" id="adCount">0</div></div>
+      <div class="stat"><div class="label">Earnings (USD)</div><div class="value"><sup>$</sup><span id="dollarCount">0.00</span></div></div>
+    </div>
+
+    <div class="progress">
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted)"><div>Withdrawal Progress</div><div id="progressText">0 / 1500</div></div>
+      <div class="progress-bar"><span id="progressFill"></span></div>
+    </div>
+
+    <button class="btn primary" id="watchAdBtn" onclick="watchAd()">📺 Watch Ad & Earn</button>
+    <button class="btn gray" onclick="logout()">Logout</button>
+    <div class="small">Tip: Ads work best on Android builds or when wrapped inside an APK. Browser will show a simulated ad for testing.</div>
+  </div>
+
+  <div class="banner-placeholder" id="bannerAd">Banner Ad Placeholder</div>
+</div>
+
+<!-- WITHDRAW VIEW -->
+<div id="withdraw" class="view hidden">
+  <div class="card">
+    <h3 class="center">Withdraw Instructions</h3>
+    <p class="small">When you reach 1500 ads = 1 USDT, use the withdrawal link below. This opens in Trust Wallet browser.</p>
+    <div class="card" style="background:rgba(0,0,0,0.18);margin-top:8px;text-align:center">
+      <div id="withdrawLink" style="word-break:break-all">https://mrsajid-ali.github.io/AdWatchEarn/</div>
+      <button class="btn primary" style="margin-top:8px" onclick="copyWithdrawLink()">💸 Copy Withdrawal Link</button>
+    </div>
+    <div class="small" style="margin-top:12px">Follow the instructions on the Trust Wallet page to connect your wallet and withdraw.</div>
+  </div>
+</div>
+
+<!-- PRIVACY VIEW -->
+<div id="privacy" class="view hidden">
+  <div class="card">
+    <h3 class="center">Privacy & Policy</h3>
+    <p class="small">This app uses Firebase Authentication and Firestore to store the number of ads a user watched. No sensitive payment credentials are stored. See full policy link below.</p>
+    <div class="small" style="margin-top:8px"><a href="https://www.freeprivacypolicy.com/live/2bf94a60-4ce6-4270-acfd-59e8131d1539" target="_blank">Full Privacy Policy</a></div>
+  </div>
+</div>
+
+<div class="footer-note">Made with ❤️ • Ad IDs included for mobile builds</div>
+
+  </div>  <!-- Firebase SDK (compat) -->  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>  <script>
+    // ----------------- CONFIG -----------------
+    const REPO_NAME = 'AdWatchEarn';
+    const firebaseConfig = {
+      apiKey: "AIzaSyCD8dZjN3ccClmYLUSc4KXHPKhyEkG6JYk",
+      authDomain: "adwatchearn-1a924.firebaseapp.com",
+      projectId: "adwatchearn-1a924",
+      storageBucket: "adwatchearn-1a924.appspot.com",
+      messagingSenderId: "50735193424",
+      appId: "1:50735193424:web:4a4452ecf8b01ff6722055"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const ADS_NEEDED = 1500;
+    const REWARD_USD = 1;
+    const ADMOB = {
+      appId: 'ca-app-pub-1297930471801325~4478735165',
+      rewarded: 'ca-app-pub-1297930471801325/4013961969',
+      banner: 'ca-app-pub-1297930471801325/6782583774',
+      interstitial: 'ca-app-pub-1297930471801325/4289294133',
+      native: 'ca-app-pub-1297930471801325/9408747118'
+    };
+
+    // ------------- ELEMENTS ----------------
+    const authView = document.getElementById('authView'), dashboardView = document.getElementById('dashboard'), withdrawView = document.getElementById('withdraw'), privacyView = document.getElementById('privacy'), adCountEl = document.getElementById('adCount'), dollarCountEl = document.getElementById('dollarCount'), progressText = document.getElementById('progressText'), progressFill = document.getElementById('progressFill'), watchAdBtn = document.getElementById('watchAdBtn'), welcomeMsg = document.getElementById('welcomeMsg'), withdrawLinkEl = document.getElementById('withdrawLink'), bannerEl = document.getElementById('bannerAd');
+
+    // ------------- STATE -------------------
+    let currentUser = null, adsWatched = 0, unsubscribe = null;
+
+    // ------------- UI / Tabs ----------------
+    function showTab(name){
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+      if(document.getElementById(`tab-${name}`)) document.getElementById(`tab-${name}`).classList.add('active');
+      if(document.getElementById(name)) document.getElementById(name).classList.remove('hidden');
+    }
+    showTab('auth'); // Default view
+    function toggleAuth(){ document.getElementById('loginCard').classList.toggle('hidden'); document.getElementById('registerCard').classList.toggle('hidden'); document.getElementById('loginError').innerText=''; document.getElementById('registerError').innerText=''; }
+
+    // ------------- AUTH --------------------
+    function login(){ auth.signInWithEmailAndPassword(document.getElementById('loginEmail').value, document.getElementById('loginPassword').value).catch(e=>document.getElementById('loginError').innerText=e.message); }
+    function register(){ auth.createUserWithEmailAndPassword(document.getElementById('registerEmail').value, document.getElementById('registerPassword').value).catch(e=>document.getElementById('registerError').innerText=e.message); }
+    function logout(){ auth.signOut(); }
+
+    auth.onAuthStateChanged(user=>{
+      if(user){
+        currentUser=user; welcomeMsg.innerText = `Welcome, ${user.email.split('@')[0]}!`; showTab('dashboard');
+        if(unsubscribe) unsubscribe();
+        unsubscribe = db.collection('users').doc(user.uid).onSnapshot(doc=>{
+          if(doc.exists){ adsWatched = doc.data().adsWatched || 0; } 
+          else { db.collection('users').doc(user.uid).set({email:user.email,adsWatched:0,createdAt:firebase.firestore.FieldValue.serverTimestamp()}); adsWatched = 0; }
+          renderDashboard();
+        });
+      } else {
+        currentUser=null; if(unsubscribe) unsubscribe(); showTab('auth');
+      }
+    });
+
+    // ------------- RENDER -----------------
+    function renderDashboard(){
+      adCountEl.innerText = adsWatched;
+      const dollars = Math.floor(adsWatched / ADS_NEEDED) * REWARD_USD;
+      dollarCountEl.innerText = dollars.toFixed(2);
+      const progress = adsWatched % ADS_NEEDED;
+      progressText.innerText = `${progress} / ${ADS_NEEDED}`;
+      progressFill.style.width = `${(progress/ADS_NEEDED)*100}%`;
+    }
+
+    // ------------- AD LOGIC (Simulated) ----------------
+    let adLoading = false;
+    function watchAd(){
+      if(!currentUser || adLoading) return;
+      adLoading = true; watchAdBtn.disabled = true; watchAdBtn.innerText = 'Ad Loading...';
+      setTimeout(()=>{
+        onAdCompleted();
+        watchAdBtn.innerText = '📺 Watch Ad & Earn'; watchAdBtn.disabled = false; adLoading = false;
+      }, 3000);
+    }
+    function onAdCompleted(){
+      if(!currentUser) return;
+      db.collection('users').doc(currentUser.uid).update({ adsWatched: firebase.firestore.FieldValue.increment(1), updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    }
+    window.onRewardedAdComplete = onAdCompleted;
+
+    // ------------- Withdraw / copy link -----------------
+    function copyWithdrawLink(){
+      const link = `https://mrsajid-ali.github.io/${REPO_NAME}/`;
+      navigator.clipboard.writeText(link).then(()=>alert('Withdrawal link copied!')).catch(()=>prompt('Copy this link:', link));
+    }
+
+    // ------------- Init -----------------
+    window.addEventListener('load',()=>{
+      withdrawLinkEl.innerText = `https://mrsajid-ali.github.io/${REPO_NAME}/`;
+    });
+  </script>
+</body>
+</html>
